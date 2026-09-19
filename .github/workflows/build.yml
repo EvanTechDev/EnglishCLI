@@ -1,0 +1,45 @@
+name: Build Windows EXE
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "pyinstaller==5.13.2"
+
+      - name: Build EXE
+        run: |
+          pyinstaller `
+            --onefile `
+            --console `
+            --name VocabularyQuiz `
+            main.py
+
+      - name: Copy vocabulary file
+        run: |
+          copy u2.txt dist\u2.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VocabularyQuiz-Windows-x64
+          path: |
+            dist/VocabularyQuiz.exe
+            dist/u2.txt
